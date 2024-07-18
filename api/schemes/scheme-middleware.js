@@ -8,13 +8,18 @@
 */
 const schemes = require('./scheme-model')
 const checkSchemeId = (req, res, next) => {
-  const {id} = req.params
-schemes.findById(id)
-.then(sheme => {
-  if(sheme && Object.keys(sheme).length > 0){ req.sheme = sheme; next()}
+  const {scheme_id} = req.params
+schemes.findById(scheme_id)
+.then(scheme => {
+  if(scheme && Object.keys(scheme).length > 0){ req.scheme = scheme; next()}
   else
-  res.status(404).json({message:`scheme with scheme_id ${id} not found`})
+  res.status(404).json({message:`scheme with scheme_id ${scheme_id} not found`})
 })
+.catch(err => res.status(err.status || 500).json({
+  Location: 'this error is in the middleware checkSchemeId',
+  message: err.message,
+  stack: err.stack,
+}))
 }
 
 /*
