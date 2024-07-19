@@ -17,7 +17,12 @@ function find() { // EXERCISE A
     2A- When you have a grasp on the query go ahead and build it in Knex.
     Return from this function the resulting dataset.
   */
- return db('schemes')
+ return db('schemes as sc')
+ .select('sc.*')
+ .count('st.step_id as number_of_steps')
+ .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
+ .groupBy('sc.scheme_id')
+ .orderBy('sc.scheme_id', 'asc')
 }
 
 function findById(scheme_id) { // EXERCISE B
@@ -85,10 +90,34 @@ function findById(scheme_id) { // EXERCISE B
         "scheme_name": "Have Fun!",
         "steps": []
       }
+
+      SELECT
+          sc.scheme_name,
+          st.*
+      FROM schemes as sc
+      LEFT JOIN steps as st
+          ON sc.scheme_id = st.scheme_id
+      WHERE sc.scheme_id = 1
+      ORDER BY st.step_number ASC;
   */
- return db('schemes')
- .where('scheme_id', scheme_id)
- .first();
+ return db('schemes as sc')
+ .select('sc.scheme_name', 'st.*')
+ .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
+ .where('sc.scheme_id', scheme_id)
+ .orderBy('st.step_number', 'asc')
+ .then(steps => {
+  const scheme = {
+    scheme_id: scheme_id,
+    scheme_name: steps[0].scheme_name,
+    steps: [ steps.map(step => ({
+      step_id: step.step_id,
+      step_number: step.step_number,
+      instructions: step.instructions
+    })).filter(step => step.step_id !== null)
+    ]
+  }
+ return scheme
+ })
 }
 
 function findSteps(scheme_id) { // EXERCISE C
