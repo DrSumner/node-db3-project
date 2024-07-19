@@ -11,12 +11,12 @@ const checkSchemeId = (req, res, next) => {
   const {scheme_id} = req.params
 schemes.findById(scheme_id)
 .then(scheme => {
-  if(scheme && Object.keys(scheme).length > 0){ req.scheme = scheme; next()}
+  if(scheme && Object.keys(scheme).length > 0){ next()}
   else
   res.status(404).json({message:`scheme with scheme_id ${scheme_id} not found`})
 })
 .catch(err => res.status(err.status || 500).json({
-  Location: 'this error is in the middleware checkSchemeId',
+  Location: 'something went horribly wrong! -Dave Chapelle',
   message: err.message,
   stack: err.stack,
 }))
@@ -50,7 +50,7 @@ if(typeof scheme_name !== "string" || !scheme_name || scheme_name.length < 0){
   }
 */
 const validateStep = (req, res, next) => {
-const {step} = req.body
+const step = req.body
 if(!step.instructions || step.instructions.length < 0 || 
   typeof step.instructions !== "string" || 
   typeof step.step_number !== "number" || step.step_number < 1){ 

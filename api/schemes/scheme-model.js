@@ -90,15 +90,6 @@ function findById(scheme_id) { // EXERCISE B
         "scheme_name": "Have Fun!",
         "steps": []
       }
-
-      SELECT
-          sc.scheme_name,
-          st.*
-      FROM schemes as sc
-      LEFT JOIN steps as st
-          ON sc.scheme_id = st.scheme_id
-      WHERE sc.scheme_id = 1
-      ORDER BY st.step_number ASC;
   */
  return db('schemes as sc')
  .select('sc.scheme_name', 'st.*')
@@ -106,15 +97,16 @@ function findById(scheme_id) { // EXERCISE B
  .where('sc.scheme_id', scheme_id)
  .orderBy('st.step_number', 'asc')
  .then(steps => {
+  if(steps.length <= 0){return null}
   const scheme = {
-    scheme_id: scheme_id,
+    scheme_id: parseInt(scheme_id),
     scheme_name: steps[0].scheme_name,
-    steps: [ steps.map(step => ({
+    steps: steps.map(step => ({
       step_id: step.step_id,
       step_number: step.step_number,
       instructions: step.instructions
     })).filter(step => step.step_id !== null)
-    ]
+    
   }
  return scheme
  })
@@ -158,6 +150,9 @@ function add(scheme) { // EXERCISE D
   /*
     1D- This function creates a new scheme and resolves to _the newly created scheme_.
   */
+ return db('schemes')
+ .insert(scheme)
+ .then(([id]) => findById(id))
 }
 
 function addStep(scheme_id, step) { // EXERCISE E
@@ -166,6 +161,14 @@ function addStep(scheme_id, step) { // EXERCISE E
     and resolves to _all the steps_ belonging to the given `scheme_id`,
     including the newly created one.
   */
+ const inserter = {
+  scheme_id: scheme_id,
+  step_number: step.step_number,
+  instructions: step.instructions,
+ }
+ return db('steps')
+ .insert(inserter)
+ .then(() => findSteps(scheme_id))
 }
 
 module.exports = {
